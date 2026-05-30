@@ -30,9 +30,13 @@ function cellBg(
   return 'white';
 }
 
-function cellText(grade: number | null, attendance: AttendanceStatus | null): string {
-  const att = attendance === 'absent' ? 'Н' : attendance === 'late' ? 'О' : null;
-  if (att && grade !== null) return `${grade}`;
+function cellText(grade: number | null, attendance: AttendanceStatus | null, lateMinutes: number | null): string {
+  if (attendance === 'late') {
+    const lateStr = lateMinutes != null ? String(lateMinutes) : 'О';
+    return grade !== null ? String(grade) : lateStr;
+  }
+  const att = attendance === 'absent' ? 'Н' : null;
+  if (att && grade !== null) return String(grade);
   if (att) return att;
   if (grade !== null) return String(grade);
   return '';
@@ -92,6 +96,10 @@ export default function TeacherJournalPage() {
 
   // mobile action picker
   const [mobileCell, setMobileCell] = useState<{ studentId: number; lessonId: number } | null>(null);
+
+  // late-minutes modal
+  const [lateModal, setLateModal] = useState<{ studentId: number; lessonId: number } | null>(null);
+  const [lateMinInput, setLateMinInput] = useState<number | null>(null);
 
   // add lesson modal
   const [addLessonOpen, setAddLessonOpen] = useState(false);
@@ -156,14 +164,36 @@ export default function TeacherJournalPage() {
     if (cell?.attendance === 'late') {
       removeAttendance(studentId, lessonId);
     } else {
-      saveAttendance(studentId, lessonId, 'late');
+      handleSetLate(studentId, lessonId);
     }
   }
 
-  async function saveAttendance(studentId: number, lessonId: number, status: AttendanceStatus) {
+  function handleSetLate(studentId: number, lessonId: number) {
+    const lesson = journal!.lessons.find((l) => l.id === lessonId);
+    const slot = lesson ? selectedPair?.slots.find((s) => s.id === lesson.scheduleId) : null;
+    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if (slot && lesson?.date === today) {
+      const [sh, sm] = slot.startTime.split(':').map(Number);
+      const [eh, em] = slot.endTime.split(':').map(Number);
+      const startMin = sh * 60 + sm;
+      const endMin = eh * 60 + em;
+      if (nowMinutes >= startMin && nowMinutes <= endMin) {
+        saveAttendance(studentId, lessonId, 'late', nowMinutes - startMin);
+        return;
+      }
+    }
+
+    setLateMinInput(null);
+    setLateModal({ studentId, lessonId });
+  }
+
+  async function saveAttendance(studentId: number, lessonId: number, status: AttendanceStatus, lateMinutes?: number | null) {
     try {
-      await journalApi.setAttendance(studentId, lessonId, status);
-      applyAttendance(studentId, lessonId, status);
+      await journalApi.setAttendance(studentId, lessonId, status, lateMinutes);
+      applyAttendance(studentId, lessonId, status, lateMinutes);
     } catch {
       messageApi.error('Ошибка сохранения');
     }
@@ -218,7 +248,7 @@ export default function TeacherJournalPage() {
     });
   }
 
-  function applyAttendance(studentId: number, lessonId: number, status: AttendanceStatus | null) {
+  function applyAttendance(studentId: number, lessonId: number, status: AttendanceStatus | null, lateMinutes?: number | null) {
     setJournal((prev) => {
       if (!prev) return prev;
       return {
@@ -226,7 +256,11 @@ export default function TeacherJournalPage() {
         students: prev.students.map((s) =>
           s.id !== studentId ? s : {
             ...s,
-            cells: s.cells.map((c) => c.lessonId !== lessonId ? c : { ...c, attendance: status }),
+            cells: s.cells.map((c) => c.lessonId !== lessonId ? c : {
+              ...c,
+              attendance: status,
+              lateMinutes: status === 'late' ? (lateMinutes ?? null) : null,
+            }),
           },
         ),
       };
@@ -382,7 +416,7 @@ export default function TeacherJournalPage() {
                       const cell = student.cells.find((c) => c.lessonId === lesson.id);
                       const isHigh = hoveredRow === ri || hoveredCol === ci;
                       const bg = cellBg(cell?.grade ?? null, cell?.attendance ?? null, isHigh);
-                      const txt = cell ? cellText(cell.grade, cell.attendance) : '';
+                      const txt = cell ? cellText(cell.grade, cell.attendance, cell.lateMinutes) : '';
                       const fg = cell ? cellFg(cell.grade, cell.attendance) : '#333';
                       const isEditing = editCell?.studentId === student.id && editCell?.lessonId === lesson.id;
 
@@ -436,7 +470,15 @@ export default function TeacherJournalPage() {
                               </Button>
                             </div>
                           ) : (
-                            <Tooltip title={cell?.attendance === 'absent' ? 'Пропуск' : cell?.attendance === 'late' ? 'Опоздание' : undefined} placement="top">
+                            <Tooltip
+                              title={
+                                cell?.attendance === 'absent' ? 'Пропуск'
+                                : cell?.attendance === 'late'
+                                  ? (cell.lateMinutes != null ? `Опоздание: ${cell.lateMinutes} мин` : 'Опоздание')
+                                  : undefined
+                              }
+                              placement="top"
+                            >
                               <span>{txt || ' '}</span>
                             </Tooltip>
                           )}
@@ -479,7 +521,7 @@ export default function TeacherJournalPage() {
           <Button
             block
             onClick={() => {
-              if (mobileCell) { saveAttendance(mobileCell.studentId, mobileCell.lessonId, 'late'); setMobileCell(null); }
+              if (mobileCell) { handleSetLate(mobileCell.studentId, mobileCell.lessonId); setMobileCell(null); }
             }}
           >
             О — опоздание
@@ -500,6 +542,52 @@ export default function TeacherJournalPage() {
           >
             Убрать оценку
           </Button>
+        </div>
+      </Modal>
+
+      {/* Late minutes modal */}
+      <Modal
+        title="Опоздание"
+        open={!!lateModal}
+        onCancel={() => { setLateModal(null); setLateMinInput(null); }}
+        footer={null}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '8px 0' }}>
+          <Text>Сколько минут опаздывал студент?</Text>
+          <InputNumber
+            min={1}
+            max={300}
+            value={lateMinInput}
+            onChange={(v) => setLateMinInput(v)}
+            placeholder="Минуты"
+            style={{ width: '100%' }}
+          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button
+              type="primary"
+              disabled={!lateMinInput}
+              onClick={async () => {
+                if (lateModal && lateMinInput) {
+                  await saveAttendance(lateModal.studentId, lateModal.lessonId, 'late', lateMinInput);
+                  setLateModal(null);
+                  setLateMinInput(null);
+                }
+              }}
+            >
+              Сохранить
+            </Button>
+            <Button
+              onClick={async () => {
+                if (lateModal) {
+                  await saveAttendance(lateModal.studentId, lateModal.lessonId, 'late', null);
+                  setLateModal(null);
+                  setLateMinInput(null);
+                }
+              }}
+            >
+              Просто О
+            </Button>
+          </div>
         </div>
       </Modal>
 

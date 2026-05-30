@@ -39,8 +39,8 @@ export function getJournal(req: Request, res: Response) {
     ? db.select().from(grades).where(inArray(grades.lessonId, lessonIds)).all()
     : [];
 
-  const attMap = new Map<string, string>();
-  for (const a of attendanceRows) attMap.set(`${a.studentId}_${a.lessonId}`, a.status);
+  const attMap = new Map<string, { status: string; lateMinutes: number | null }>();
+  for (const a of attendanceRows) attMap.set(`${a.studentId}_${a.lessonId}`, { status: a.status, lateMinutes: a.lateMinutes ?? null });
 
   const gradeMap = new Map<string, number>();
   for (const g of gradeRows) gradeMap.set(`${g.studentId}_${g.lessonId}`, g.value);
@@ -53,7 +53,8 @@ export function getJournal(req: Request, res: Response) {
     cells: lessonRows.map(lesson => ({
       lessonId: lesson.id,
       date: lesson.date,
-      attendance: attMap.get(`${student.id}_${lesson.id}`) ?? null,
+      attendance: attMap.get(`${student.id}_${lesson.id}`)?.status ?? null,
+      lateMinutes: attMap.get(`${student.id}_${lesson.id}`)?.lateMinutes ?? null,
       grade: gradeMap.get(`${student.id}_${lesson.id}`) ?? null,
     })),
   }));
@@ -80,6 +81,7 @@ export function addLesson(req: Request, res: Response) {
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
       if (nowMinutes > startMinutes) {
+        const lateMinutes = nowMinutes - startMinutes;
         const tsg = db.select().from(teacherSubjectGroup)
           .where(eq(teacherSubjectGroup.id, slot.tsgId)).get();
         if (tsg) {
@@ -90,6 +92,7 @@ export function addLesson(req: Request, res: Response) {
               studentId: sg.studentId,
               lessonId: lesson.id,
               status: 'late',
+              lateMinutes,
             }).run();
           }
         }
@@ -102,17 +105,19 @@ export function addLesson(req: Request, res: Response) {
 
 // PUT /api/attendance
 export function setAttendance(req: Request, res: Response) {
-  const { studentId, lessonId, status } = req.body;
+  const { studentId, lessonId, status, lateMinutes } = req.body;
   if (!studentId || !lessonId || !status) { res.status(400).json({ error: 'studentId, lessonId, status required' }); return; }
   if (!['present', 'absent', 'late'].includes(status)) { res.status(400).json({ error: 'Invalid status' }); return; }
+
+  const mins = status === 'late' && lateMinutes != null ? Number(lateMinutes) : null;
 
   const existing = db.select().from(attendance)
     .where(and(eq(attendance.studentId, studentId), eq(attendance.lessonId, lessonId))).get();
 
   if (existing) {
-    db.update(attendance).set({ status }).where(eq(attendance.id, existing.id)).run();
+    db.update(attendance).set({ status, lateMinutes: mins }).where(eq(attendance.id, existing.id)).run();
   } else {
-    db.insert(attendance).values({ studentId, lessonId, status }).run();
+    db.insert(attendance).values({ studentId, lessonId, status, lateMinutes: mins }).run();
   }
   res.json({ ok: true });
 }
@@ -181,7 +186,7 @@ export function getMyJournal(req: Request, res: Response) {
       ? db.select().from(grades).where(and(inArray(grades.lessonId, lessonIds), eq(grades.studentId, userId))).all()
       : [];
 
-    const attMap = new Map(attRows.map(a => [a.lessonId, a.status]));
+    const attMap = new Map(attRows.map(a => [a.lessonId, { status: a.status, lateMinutes: a.lateMinutes ?? null }]));
     const gradeMap = new Map(gradeRows.map(g => [g.lessonId, g.value]));
 
     return {
@@ -189,7 +194,8 @@ export function getMyJournal(req: Request, res: Response) {
       cells: lessonRows.map(l => ({
         lessonId: l.id,
         date: l.date,
-        attendance: attMap.get(l.id) ?? null,
+        attendance: attMap.get(l.id)?.status ?? null,
+        lateMinutes: attMap.get(l.id)?.lateMinutes ?? null,
         grade: gradeMap.get(l.id) ?? null,
       })),
     };

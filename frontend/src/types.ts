@@ -31,6 +31,7 @@ export interface JournalCell {
   lessonId: number;
   date: string;
   attendance: AttendanceStatus | null;
+  lateMinutes: number | null;
   grade: number | null;
 }
 

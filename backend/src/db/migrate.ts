@@ -97,6 +97,7 @@ sqlite.exec(`
 // Добавить колонку если её ещё нет (для существующих БД)
 try { sqlite.exec(`ALTER TABLE lab_works ADD COLUMN created_at TEXT`); } catch { /* already exists */ }
 try { sqlite.exec(`ALTER TABLE lab_works ADD COLUMN start_date TEXT`); } catch { /* already exists */ }
+try { sqlite.exec(`ALTER TABLE attendance ADD COLUMN late_minutes INTEGER`); } catch { /* already exists */ }
 
 console.log('Migration complete.');
 sqlite.close();

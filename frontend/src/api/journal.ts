@@ -3,7 +3,7 @@ import type { JournalResponse, AttendanceStatus } from '../types';
 
 export interface MyJournalEntry {
   subjectId: number;
-  cells: { lessonId: number; date: string; attendance: AttendanceStatus | null; grade: number | null }[];
+  cells: { lessonId: number; date: string; attendance: AttendanceStatus | null; lateMinutes: number | null; grade: number | null }[];
 }
 
 export const journalApi = {
@@ -19,8 +19,8 @@ export const journalApi = {
       { scheduleId, date },
     ).then((r) => r.data),
 
-  setAttendance: (studentId: number, lessonId: number, status: AttendanceStatus) =>
-    api.put('/api/journal/attendance', { studentId, lessonId, status }).then((r) => r.data),
+  setAttendance: (studentId: number, lessonId: number, status: AttendanceStatus, lateMinutes?: number | null) =>
+    api.put('/api/journal/attendance', { studentId, lessonId, status, lateMinutes }).then((r) => r.data),
 
   clearAttendance: (studentId: number, lessonId: number) =>
     api.delete('/api/journal/attendance', { data: { studentId, lessonId } }).then((r) => r.data),
