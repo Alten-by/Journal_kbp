@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Spin, Typography, Card, Tag, Button, Empty, Badge, Descriptions, Space } from 'antd';
-import { ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, FileOutlined } from '@ant-design/icons';
+import { Spin, Typography, Card, Tag, Button, Empty, Badge, Space } from 'antd';
+import { ArrowLeftOutlined, ClockCircleOutlined, FileOutlined } from '@ant-design/icons';
 import { studentApi, type StudentSubjectDetail, type StudentSubject, type LabEntry } from '../api/student';
 import type { LabType, AttendanceStatus } from '../types';
 
@@ -25,7 +25,7 @@ function gradeTag(value: number) {
   return <Tag color={color} style={{ fontWeight: 600, fontSize: 14 }}>{value}</Tag>;
 }
 
-function LabCard({ lab, subjectId }: { lab: LabEntry; subjectId: number }) {
+function LabCard({ lab }: { lab: LabEntry }) {
   const navigate = useNavigate();
   const isSubmitted = !!lab.submittedAt;
   const isChecked = lab.grade !== null;
@@ -158,7 +158,7 @@ export default function SubjectPage() {
             style={{ marginBottom: 16 }}
           >
             {labs.map((lab) => (
-              <LabCard key={lab.id} lab={lab} subjectId={Number(id)} />
+              <LabCard key={lab.id} lab={lab} />
             ))}
           </Card>
         );

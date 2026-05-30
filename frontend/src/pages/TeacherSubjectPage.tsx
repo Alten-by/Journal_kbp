@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Spin, Typography, Card, Button, Tag, Modal, Form, Input, Select,
-  DatePicker, Switch, Upload, message, Popconfirm, List, Avatar, Empty, Space, Divider,
+  DatePicker, Switch, Upload, message, List, Empty, Space,
 } from 'antd';
 import {
   ArrowLeftOutlined, PlusOutlined, EditOutlined, UploadOutlined,
-  UserOutlined, FileOutlined, TeamOutlined, EyeOutlined,
+  FileOutlined, TeamOutlined, EyeOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { UploadFile } from 'antd';
 import { labsApi } from '../api/labs';
 import { scheduleApi } from '../api/schedule';
-import { studentApi } from '../api/student';
 import type { LabWork, LabType } from '../types';
 
 const { Title, Text } = Typography;
@@ -43,7 +42,7 @@ export default function TeacherSubjectPage() {
   const [labs, setLabs] = useState<LabWork[]>([]);
   const [subjectName, setSubjectName] = useState('');
   const [groupId, setGroupId] = useState<number | null>(null);
-  const [studentOptions, setStudentOptions] = useState<StudentOption[]>([]);
+  const [studentOptions] = useState<StudentOption[]>([]);
   const [loading, setLoading] = useState(true);
 
   // modal state

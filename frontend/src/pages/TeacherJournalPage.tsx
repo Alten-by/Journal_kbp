@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Select, Button, Spin, Typography, Empty, Modal,
   InputNumber, message, DatePicker, Tooltip, Space, Grid,
@@ -19,7 +19,7 @@ const HEADER_HOVER = '#91caff';
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function cellBg(
-  grade: number | null,
+  _grade: number | null,
   attendance: AttendanceStatus | null,
   isHigh: boolean,
 ): string {
@@ -72,7 +72,7 @@ function buildPairs(schedule: ScheduleSlot[]): Pair[] {
 // ─── component ───────────────────────────────────────────────────────────────
 
 export default function TeacherJournalPage() {
-  const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
+  const [, setSchedule] = useState<ScheduleSlot[]>([]);
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [selectedPair, setSelectedPair] = useState<Pair | null>(null);
   const [journal, setJournal] = useState<JournalResponse | null>(null);
@@ -86,7 +86,6 @@ export default function TeacherJournalPage() {
   // grade input popup
   const [editCell, setEditCell] = useState<{ studentId: number; lessonId: number } | null>(null);
   const [gradeValue, setGradeValue] = useState<number | null>(null);
-  const gradeInputRef = useRef<HTMLInputElement | null>(null);
 
   // mobile action picker
   const [mobileCell, setMobileCell] = useState<{ studentId: number; lessonId: number } | null>(null);
@@ -132,7 +131,6 @@ export default function TeacherJournalPage() {
       ?.cells.find((c) => c.lessonId === lessonId);
     setGradeValue(cell?.grade ?? null);
     setEditCell({ studentId, lessonId });
-    setTimeout(() => gradeInputRef.current?.focus(), 50);
   }
 
   function handleCellRightClick(e: React.MouseEvent, studentId: number, lessonId: number) {
@@ -355,7 +353,7 @@ export default function TeacherJournalPage() {
                         >
                           {isEditing ? (
                             <InputNumber
-                              ref={gradeInputRef as React.Ref<HTMLInputElement>}
+                              autoFocus
                               min={1}
                               max={12}
                               value={gradeValue}
