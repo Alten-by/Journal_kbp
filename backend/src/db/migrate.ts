@@ -72,6 +72,7 @@ sqlite.exec(`
     type TEXT NOT NULL CHECK(type IN ('lab','practical','test','theory')),
     deadline TEXT,
     is_team INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT,
     task_file_path TEXT
   );
 
@@ -92,6 +93,9 @@ sqlite.exec(`
     student_id INTEGER NOT NULL REFERENCES users(id)
   );
 `);
+
+// Добавить колонку если её ещё нет (для существующих БД)
+try { sqlite.exec(`ALTER TABLE lab_works ADD COLUMN created_at TEXT`); } catch { /* already exists */ }
 
 console.log('Migration complete.');
 sqlite.close();

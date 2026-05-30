@@ -56,6 +56,7 @@ export interface LabWork {
   deadline: string | null;
   isTeam: boolean;
   taskFilePath: string | null;
+  createdAt: string | null;
 }
 
 export interface LabSubmission {

@@ -11,6 +11,7 @@ export const labWorks = sqliteTable('lab_works', {
   deadline: text('deadline'), // "2026-06-15"
   isTeam: integer('is_team', { mode: 'boolean' }).notNull().default(false),
   taskFilePath: text('task_file_path'),
+  createdAt: text('created_at'),
 });
 
 export const labSubmissions = sqliteTable('lab_submissions', {

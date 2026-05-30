@@ -44,6 +44,7 @@ export function createLab(req: Request, res: Response) {
     deadline: deadline ?? null,
     isTeam: isTeam === 'true' || isTeam === true,
     taskFilePath,
+    createdAt: new Date().toISOString(),
   }).returning().all();
 
   res.status(201).json(lab);
