@@ -6,11 +6,13 @@ import {
 } from 'antd';
 
 const { useBreakpoint } = Grid;
-import { PlusOutlined, BookOutlined } from '@ant-design/icons';
+import { PlusOutlined, BookOutlined, DownloadOutlined, BarChartOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { scheduleApi } from '../api/schedule';
 import { journalApi } from '../api/journal';
 import type { ScheduleSlot, JournalResponse, JournalStudent, AttendanceStatus } from '../types';
+import { exportJournalToExcel, exportJournalToCSV } from '../utils/exportJournal';
+import JournalCharts from '../components/JournalCharts';
 
 const { Title, Text } = Typography;
 
@@ -100,6 +102,9 @@ export default function TeacherJournalPage() {
   // late-minutes modal
   const [lateModal, setLateModal] = useState<{ studentId: number; lessonId: number; maxMinutes: number } | null>(null);
   const [lateMinInput, setLateMinInput] = useState<number | null>(null);
+
+  // charts visibility
+  const [showCharts, setShowCharts] = useState(false);
 
   // add lesson modal
   const [addLessonOpen, setAddLessonOpen] = useState(false);
@@ -357,6 +362,28 @@ export default function TeacherJournalPage() {
             >
               Программа предмета
             </Button>
+            {journal && (
+              <>
+                <Button
+                  icon={<BarChartOutlined />}
+                  onClick={() => setShowCharts((v) => !v)}
+                >
+                  {showCharts ? 'Скрыть графики' : 'Графики'}
+                </Button>
+                <Button
+                  icon={<DownloadOutlined />}
+                  onClick={() => exportJournalToExcel(journal, selectedPair.subjectName, selectedPair.groupName)}
+                >
+                  Excel
+                </Button>
+                <Button
+                  icon={<DownloadOutlined />}
+                  onClick={() => exportJournalToCSV(journal, selectedPair.subjectName, selectedPair.groupName)}
+                >
+                  CSV
+                </Button>
+              </>
+            )}
           </>
         )}
       </div>
@@ -496,6 +523,7 @@ export default function TeacherJournalPage() {
               </tbody>
             </table>
           </div>
+          {showCharts && <JournalCharts journal={journal} />}
         </>
       )}
 
