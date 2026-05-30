@@ -137,13 +137,23 @@ export default function TeacherJournalPage() {
 
   function handleCellRightClick(e: React.MouseEvent, studentId: number, lessonId: number) {
     e.preventDefault();
-    saveAttendance(studentId, lessonId, 'absent');
+    const cell = journal!.students.find((s) => s.id === studentId)?.cells.find((c) => c.lessonId === lessonId);
+    if (cell?.attendance === 'absent') {
+      removeAttendance(studentId, lessonId);
+    } else {
+      saveAttendance(studentId, lessonId, 'absent');
+    }
   }
 
   function handleCellMiddleClick(e: React.MouseEvent, studentId: number, lessonId: number) {
     if (e.button !== 1) return;
     e.preventDefault();
-    saveAttendance(studentId, lessonId, 'late');
+    const cell = journal!.students.find((s) => s.id === studentId)?.cells.find((c) => c.lessonId === lessonId);
+    if (cell?.attendance === 'late') {
+      removeAttendance(studentId, lessonId);
+    } else {
+      saveAttendance(studentId, lessonId, 'late');
+    }
   }
 
   async function saveAttendance(studentId: number, lessonId: number, status: AttendanceStatus) {
@@ -152,6 +162,25 @@ export default function TeacherJournalPage() {
       applyAttendance(studentId, lessonId, status);
     } catch {
       messageApi.error('Ошибка сохранения');
+    }
+  }
+
+  async function removeAttendance(studentId: number, lessonId: number) {
+    try {
+      await journalApi.clearAttendance(studentId, lessonId);
+      applyAttendance(studentId, lessonId, null);
+    } catch {
+      messageApi.error('Ошибка при удалении');
+    }
+  }
+
+  async function removeGrade(studentId: number, lessonId: number) {
+    try {
+      await journalApi.clearGrade(studentId, lessonId);
+      applyGrade(studentId, lessonId, null);
+      setEditCell(null);
+    } catch {
+      messageApi.error('Ошибка при удалении');
     }
   }
 
@@ -170,7 +199,7 @@ export default function TeacherJournalPage() {
   }
 
   // optimistic update helpers
-  function applyGrade(studentId: number, lessonId: number, value: number) {
+  function applyGrade(studentId: number, lessonId: number, value: number | null) {
     setJournal((prev) => {
       if (!prev) return prev;
       return {
@@ -185,7 +214,7 @@ export default function TeacherJournalPage() {
     });
   }
 
-  function applyAttendance(studentId: number, lessonId: number, status: AttendanceStatus) {
+  function applyAttendance(studentId: number, lessonId: number, status: AttendanceStatus | null) {
     setJournal((prev) => {
       if (!prev) return prev;
       return {
@@ -362,18 +391,29 @@ export default function TeacherJournalPage() {
                           onMouseDown={(e) => !isMobile && !student.isExpelled && handleCellMiddleClick(e, student.id, lesson.id)}
                         >
                           {isEditing ? (
-                            <InputNumber
-                              autoFocus
-                              min={1}
-                              max={12}
-                              value={gradeValue}
-                              onChange={(v) => setGradeValue(v)}
-                              onPressEnter={confirmGrade}
-                              onBlur={confirmGrade}
-                              size="small"
-                              style={{ width: 46 }}
-                              controls={false}
-                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <InputNumber
+                                autoFocus
+                                min={1}
+                                max={12}
+                                value={gradeValue}
+                                onChange={(v) => setGradeValue(v)}
+                                onPressEnter={confirmGrade}
+                                onBlur={confirmGrade}
+                                size="small"
+                                style={{ width: 46 }}
+                                controls={false}
+                              />
+                              <Button
+                                size="small"
+                                danger
+                                type="link"
+                                style={{ fontSize: 10, padding: '0 2px', height: 'auto' }}
+                                onMouseDown={(e) => { e.preventDefault(); removeGrade(student.id, lesson.id); }}
+                              >
+                                убрать
+                              </Button>
+                            </div>
                           ) : (
                             <Tooltip title={cell?.attendance === 'absent' ? 'Пропуск' : cell?.attendance === 'late' ? 'Опоздание' : undefined} placement="top">
                               <span>{txt || ' '}</span>
@@ -422,6 +462,22 @@ export default function TeacherJournalPage() {
             }}
           >
             О — опоздание
+          </Button>
+          <Button
+            block
+            onClick={() => {
+              if (mobileCell) { removeAttendance(mobileCell.studentId, mobileCell.lessonId); setMobileCell(null); }
+            }}
+          >
+            Убрать посещаемость
+          </Button>
+          <Button
+            block
+            onClick={() => {
+              if (mobileCell) { removeGrade(mobileCell.studentId, mobileCell.lessonId); setMobileCell(null); }
+            }}
+          >
+            Убрать оценку
           </Button>
         </div>
       </Modal>

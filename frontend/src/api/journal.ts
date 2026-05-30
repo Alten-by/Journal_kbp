@@ -22,6 +22,12 @@ export const journalApi = {
   setAttendance: (studentId: number, lessonId: number, status: AttendanceStatus) =>
     api.put('/api/journal/attendance', { studentId, lessonId, status }).then((r) => r.data),
 
+  clearAttendance: (studentId: number, lessonId: number) =>
+    api.delete('/api/journal/attendance', { data: { studentId, lessonId } }).then((r) => r.data),
+
   setGrade: (studentId: number, lessonId: number, value: number) =>
     api.put('/api/journal/grades', { studentId, lessonId, value }).then((r) => r.data),
+
+  clearGrade: (studentId: number, lessonId: number) =>
+    api.delete('/api/journal/grades', { data: { studentId, lessonId } }).then((r) => r.data),
 };

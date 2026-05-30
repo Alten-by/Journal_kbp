@@ -135,6 +135,26 @@ export function setGrade(req: Request, res: Response) {
   res.json({ ok: true });
 }
 
+// DELETE /api/attendance
+export function clearAttendance(req: Request, res: Response) {
+  const { studentId, lessonId } = req.body;
+  if (!studentId || !lessonId) { res.status(400).json({ error: 'studentId and lessonId required' }); return; }
+  db.delete(attendance)
+    .where(and(eq(attendance.studentId, studentId), eq(attendance.lessonId, lessonId)))
+    .run();
+  res.json({ ok: true });
+}
+
+// DELETE /api/grades
+export function clearGrade(req: Request, res: Response) {
+  const { studentId, lessonId } = req.body;
+  if (!studentId || !lessonId) { res.status(400).json({ error: 'studentId and lessonId required' }); return; }
+  db.delete(grades)
+    .where(and(eq(grades.studentId, studentId), eq(grades.lessonId, lessonId)))
+    .run();
+  res.json({ ok: true });
+}
+
 // GET /api/journal/my — для студента: его оценки и посещаемость
 export function getMyJournal(req: Request, res: Response) {
   const { userId } = req.user!;
