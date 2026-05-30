@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Spin, Typography, Card, Tag, Button, Upload, message, Alert,
-  Descriptions, Avatar, List, Divider, Space,
+  Descriptions, Avatar, List, Divider, Space, Grid,
 } from 'antd';
+
+const { useBreakpoint } = Grid;
 import {
   ArrowLeftOutlined, UploadOutlined, UserOutlined,
   CheckCircleOutlined, ClockCircleOutlined, TeamOutlined,
@@ -31,6 +33,8 @@ const TYPE_COLORS: Record<LabType, string> = {
 export default function LabPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [lab, setLab] = useState<LabDetail | null>(null);
   const [submission, setSubmission] = useState<MySubmission | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,7 +100,7 @@ export default function LabPage() {
           </div>
         </div>
 
-        <Descriptions column={2} size="small">
+        <Descriptions column={isMobile ? 1 : 2} size="small">
           {lab.deadline && (
             <Descriptions.Item label="Дедлайн">
               <Space>

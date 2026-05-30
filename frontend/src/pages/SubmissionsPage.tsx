@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Spin, Typography, Card, Table, Button, Tag, Modal, Form,
-  InputNumber, Input, message, Space, Empty,
+  InputNumber, Input, message, Space, Empty, Grid,
 } from 'antd';
+
+const { useBreakpoint } = Grid;
 import {
   ArrowLeftOutlined, CheckOutlined, FileOutlined, ClockCircleOutlined,
 } from '@ant-design/icons';
@@ -18,6 +20,8 @@ export default function SubmissionsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const labId = Number(id);
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const [lab, setLab] = useState<LabWork | null>(null);
   const [submissions, setSubmissions] = useState<LabSubmission[]>([]);
@@ -175,9 +179,10 @@ export default function SubmissionsPage() {
         <Card>
           <Table
             dataSource={submissions}
-            columns={columns}
+            columns={isMobile ? columns.filter((c) => ['studentName', 'grade', 'action'].includes(String(c.key))) : columns}
             rowKey="id"
             pagination={false}
+            scroll={{ x: isMobile ? undefined : 700 }}
             rowClassName={(record) => record.grade !== null ? '' : 'submission-unchecked'}
           />
         </Card>
