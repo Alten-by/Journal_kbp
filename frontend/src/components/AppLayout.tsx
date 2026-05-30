@@ -39,7 +39,7 @@ function NavMenu({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: '18px 16px 14px', fontWeight: 700, fontSize: 16, borderBottom: '1px solid #f0f0f0' }}>
-        Журнал КБП
+        Журнал
       </div>
       <Menu
         mode="inline"
@@ -103,7 +103,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             onClick={() => setDrawerOpen(true)}
             size="large"
           />
-          <Text strong style={{ fontSize: 16 }}>Журнал КБП</Text>
+          <Text strong style={{ fontSize: 16 }}>Журнал</Text>
         </Header>
 
         <Drawer
