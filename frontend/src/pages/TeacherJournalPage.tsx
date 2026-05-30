@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Select, Button, Spin, Typography, Empty, Modal,
-  InputNumber, message, DatePicker, Tooltip, Space,
+  InputNumber, message, DatePicker, Tooltip, Space, Grid,
 } from 'antd';
+
+const { useBreakpoint } = Grid;
 import { PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { scheduleApi } from '../api/schedule';
@@ -85,6 +87,9 @@ export default function TeacherJournalPage() {
   const [editCell, setEditCell] = useState<{ studentId: number; lessonId: number } | null>(null);
   const [gradeValue, setGradeValue] = useState<number | null>(null);
   const gradeInputRef = useRef<HTMLInputElement | null>(null);
+
+  // mobile action picker
+  const [mobileCell, setMobileCell] = useState<{ studentId: number; lessonId: number } | null>(null);
 
   // add lesson modal
   const [addLessonOpen, setAddLessonOpen] = useState(false);
@@ -215,6 +220,9 @@ export default function TeacherJournalPage() {
 
   // ─── render ───────────────────────────────────────────────────────────────
 
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   if (loadingSchedule) return <Spin size="large" style={{ display: 'block', marginTop: 80 }} />;
 
   const tdBase: React.CSSProperties = {
@@ -262,7 +270,9 @@ export default function TeacherJournalPage() {
       {selectedPair && !loadingJournal && journal && (
         <>
           <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-            ЛКМ — оценка &nbsp;|&nbsp; ПКМ — Н (пропуск) &nbsp;|&nbsp; СКМ — О (опоздание)
+            {isMobile
+              ? 'Нажмите на ячейку — выберите действие'
+              : 'ЛКМ — оценка  |  ПКМ — Н (пропуск)  |  СКМ — О (опоздание)'}
           </Text>
           <div style={{ overflowX: 'auto', borderRadius: 8, background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -333,11 +343,15 @@ export default function TeacherJournalPage() {
                             minWidth: 50,
                             position: 'relative',
                           }}
-                          onMouseEnter={() => { setHoveredRow(ri); setHoveredCol(ci); }}
-                          onMouseLeave={() => { setHoveredRow(null); setHoveredCol(null); }}
-                          onClick={() => !student.isExpelled && handleCellClick(student.id, lesson.id)}
-                          onContextMenu={(e) => !student.isExpelled && handleCellRightClick(e, student.id, lesson.id)}
-                          onMouseDown={(e) => !student.isExpelled && handleCellMiddleClick(e, student.id, lesson.id)}
+                          onMouseEnter={() => { if (!isMobile) { setHoveredRow(ri); setHoveredCol(ci); } }}
+                          onMouseLeave={() => { if (!isMobile) { setHoveredRow(null); setHoveredCol(null); } }}
+                          onClick={() => {
+                            if (student.isExpelled) return;
+                            if (isMobile) setMobileCell({ studentId: student.id, lessonId: lesson.id });
+                            else handleCellClick(student.id, lesson.id);
+                          }}
+                          onContextMenu={(e) => !isMobile && !student.isExpelled && handleCellRightClick(e, student.id, lesson.id)}
+                          onMouseDown={(e) => !isMobile && !student.isExpelled && handleCellMiddleClick(e, student.id, lesson.id)}
                         >
                           {isEditing ? (
                             <InputNumber
@@ -367,6 +381,42 @@ export default function TeacherJournalPage() {
           </div>
         </>
       )}
+
+      {/* Mobile action picker */}
+      <Modal
+        title="Действие"
+        open={!!mobileCell}
+        onCancel={() => setMobileCell(null)}
+        footer={null}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '8px 0' }}>
+          <Button
+            block
+            onClick={() => {
+              if (mobileCell) { handleCellClick(mobileCell.studentId, mobileCell.lessonId); setMobileCell(null); }
+            }}
+          >
+            Выставить оценку
+          </Button>
+          <Button
+            block
+            danger
+            onClick={() => {
+              if (mobileCell) { saveAttendance(mobileCell.studentId, mobileCell.lessonId, 'absent'); setMobileCell(null); }
+            }}
+          >
+            Н — пропуск
+          </Button>
+          <Button
+            block
+            onClick={() => {
+              if (mobileCell) { saveAttendance(mobileCell.studentId, mobileCell.lessonId, 'late'); setMobileCell(null); }
+            }}
+          >
+            О — опоздание
+          </Button>
+        </div>
+      </Modal>
 
       {/* Add lesson modal */}
       <Modal
