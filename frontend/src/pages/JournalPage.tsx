@@ -14,9 +14,9 @@ interface JournalRow {
 }
 
 function gradeColor(grade: number): string {
-  if (grade >= 10) return '#389e0d';
+  if (grade >= 9) return '#389e0d';
   if (grade >= 7) return '#096dd9';
-  if (grade >= 4) return '#d48806';
+  if (grade >= 5) return '#d48806';
   return '#cf1322';
 }
 
@@ -24,9 +24,9 @@ function cellBg(grade: number | null, attendance: AttendanceStatus | null): stri
   if (attendance === 'absent') return '#fff1f0';
   if (attendance === 'late') return '#fffbe6';
   if (grade === null) return undefined;
-  if (grade >= 10) return '#f6ffed';
+  if (grade >= 9) return '#f6ffed';
   if (grade >= 7) return '#e6f7ff';
-  if (grade >= 4) return '#fffbe6';
+  if (grade >= 5) return '#fffbe6';
   return '#fff1f0';
 }
 

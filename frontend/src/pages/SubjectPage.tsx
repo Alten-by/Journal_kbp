@@ -21,7 +21,7 @@ function attendanceBadge(att: AttendanceStatus) {
 }
 
 function gradeTag(value: number) {
-  const color = value >= 10 ? 'success' : value >= 7 ? 'processing' : value >= 4 ? 'warning' : 'error';
+  const color = value >= 9 ? 'success' : value >= 7 ? 'processing' : value >= 5 ? 'warning' : 'error';
   return <Tag color={color} style={{ fontWeight: 600, fontSize: 14 }}>{value}</Tag>;
 }
 
