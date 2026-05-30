@@ -8,6 +8,7 @@ import scheduleRouter from './routes/schedule';
 import journalRouter from './routes/journal';
 import labsRouter from './routes/labs';
 import studentRouter from './routes/student';
+import groupsRouter from './routes/groups';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/schedule', scheduleRouter);
 app.use('/api/journal', journalRouter);
 app.use('/api/labs', labsRouter);
 app.use('/api/student', studentRouter);
+app.use('/api/groups', groupsRouter);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

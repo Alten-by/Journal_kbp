@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import type { UploadFile } from 'antd';
 import { labsApi } from '../api/labs';
 import { scheduleApi } from '../api/schedule';
+import { studentApi } from '../api/student';
 import type { LabWork, LabType } from '../types';
 
 const { Title, Text } = Typography;
@@ -42,7 +43,7 @@ export default function TeacherSubjectPage() {
   const [labs, setLabs] = useState<LabWork[]>([]);
   const [subjectName, setSubjectName] = useState('');
   const [groupId, setGroupId] = useState<number | null>(null);
-  const [studentOptions] = useState<StudentOption[]>([]);
+  const [studentOptions, setStudentOptions] = useState<StudentOption[]>([]);
   const [loading, setLoading] = useState(true);
 
   // modal state
@@ -67,14 +68,11 @@ export default function TeacherSubjectPage() {
     }).finally(() => setLoading(false));
   }, [subjectId]);
 
-  // Load students when groupId is known
   useEffect(() => {
     if (!groupId) return;
-    // We use the journal endpoint indirectly through schedule;
-    // fetch via student subjects list is teacher-only workaround
-    // The backend students for a group can be derived from journal but we'll fetch from schedule
-    // Instead, use the journal API if a lesson exists; otherwise leave empty.
-    // For now use an empty list until the teacher adds team members post-creation.
+    studentApi.getGroupStudents(groupId).then((students) =>
+      setStudentOptions(students.map((s) => ({ value: s.id, label: s.name }))),
+    );
   }, [groupId]);
 
   function openCreate() {
