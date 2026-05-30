@@ -10,6 +10,7 @@ import LabPage from './pages/LabPage';
 import TeacherJournalPage from './pages/TeacherJournalPage';
 import TeacherSubjectPage from './pages/TeacherSubjectPage';
 import SubmissionsPage from './pages/SubmissionsPage';
+import StudentStatsPage from './pages/StudentStatsPage';
 
 function WithLayout({ children }: { children: React.ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
@@ -38,6 +39,10 @@ export default function App() {
           <Route
             path="/labs/:id"
             element={<PrivateRoute role="student"><WithLayout><LabPage /></WithLayout></PrivateRoute>}
+          />
+          <Route
+            path="/stats"
+            element={<PrivateRoute role="student"><WithLayout><StudentStatsPage /></WithLayout></PrivateRoute>}
           />
 
           <Route

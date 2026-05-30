@@ -6,6 +6,7 @@ import {
   BookOutlined,
   LogoutOutlined,
   MenuOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +17,7 @@ const { useBreakpoint } = Grid;
 const studentItems = [
   { key: '/schedule', icon: <CalendarOutlined />, label: 'Расписание' },
   { key: '/journal', icon: <BookOutlined />, label: 'Журнал' },
+  { key: '/stats', icon: <BarChartOutlined />, label: 'Успеваемость' },
 ];
 
 const teacherItems = [
