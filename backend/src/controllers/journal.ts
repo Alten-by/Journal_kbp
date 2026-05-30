@@ -110,6 +110,9 @@ export function setAttendance(req: Request, res: Response) {
   if (!['present', 'absent', 'late'].includes(status)) { res.status(400).json({ error: 'Invalid status' }); return; }
 
   const mins = status === 'late' && lateMinutes != null ? Number(lateMinutes) : null;
+  if (mins !== null && (mins < 1 || !Number.isInteger(mins))) {
+    res.status(400).json({ error: 'lateMinutes must be a positive integer' }); return;
+  }
 
   const existing = db.select().from(attendance)
     .where(and(eq(attendance.studentId, studentId), eq(attendance.lessonId, lessonId))).get();

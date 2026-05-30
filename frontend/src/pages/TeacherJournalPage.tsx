@@ -98,7 +98,7 @@ export default function TeacherJournalPage() {
   const [mobileCell, setMobileCell] = useState<{ studentId: number; lessonId: number } | null>(null);
 
   // late-minutes modal
-  const [lateModal, setLateModal] = useState<{ studentId: number; lessonId: number } | null>(null);
+  const [lateModal, setLateModal] = useState<{ studentId: number; lessonId: number; maxMinutes: number } | null>(null);
   const [lateMinInput, setLateMinInput] = useState<number | null>(null);
 
   // add lesson modal
@@ -175,19 +175,25 @@ export default function TeacherJournalPage() {
     const now = new Date();
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-    if (slot && lesson?.date === today) {
+    if (slot) {
       const [sh, sm] = slot.startTime.split(':').map(Number);
       const [eh, em] = slot.endTime.split(':').map(Number);
       const startMin = sh * 60 + sm;
       const endMin = eh * 60 + em;
-      if (nowMinutes >= startMin && nowMinutes <= endMin) {
+      const lessonDuration = endMin - startMin;
+
+      if (lesson?.date === today && nowMinutes >= startMin && nowMinutes <= endMin) {
         saveAttendance(studentId, lessonId, 'late', nowMinutes - startMin);
         return;
       }
+
+      setLateMinInput(null);
+      setLateModal({ studentId, lessonId, maxMinutes: lessonDuration });
+      return;
     }
 
     setLateMinInput(null);
-    setLateModal({ studentId, lessonId });
+    setLateModal({ studentId, lessonId, maxMinutes: 300 });
   }
 
   async function saveAttendance(studentId: number, lessonId: number, status: AttendanceStatus, lateMinutes?: number | null) {
@@ -556,10 +562,10 @@ export default function TeacherJournalPage() {
           <Text>Сколько минут опаздывал студент?</Text>
           <InputNumber
             min={1}
-            max={300}
+            max={lateModal?.maxMinutes}
             value={lateMinInput}
             onChange={(v) => setLateMinInput(v)}
-            placeholder="Минуты"
+            placeholder={`Минуты (1–${lateModal?.maxMinutes ?? '...'})`}
             style={{ width: '100%' }}
           />
           <div style={{ display: 'flex', gap: 8 }}>
