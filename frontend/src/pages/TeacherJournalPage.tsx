@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Select, Button, Spin, Typography, Empty, Modal,
   InputNumber, message, DatePicker, Tooltip, Space, Grid,
 } from 'antd';
 
 const { useBreakpoint } = Grid;
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, BookOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { scheduleApi } from '../api/schedule';
 import { journalApi } from '../api/journal';
@@ -72,6 +73,7 @@ function buildPairs(schedule: ScheduleSlot[]): Pair[] {
 // ─── component ───────────────────────────────────────────────────────────────
 
 export default function TeacherJournalPage() {
+  const navigate = useNavigate();
   const [, setSchedule] = useState<ScheduleSlot[]>([]);
   const [pairs, setPairs] = useState<Pair[]>([]);
   const [selectedPair, setSelectedPair] = useState<Pair | null>(null);
@@ -249,15 +251,23 @@ export default function TeacherJournalPage() {
           }))}
         />
         {selectedPair && (
-          <Button
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setLessonSlotId(selectedPair.slots[0]?.id ?? null);
-              setAddLessonOpen(true);
-            }}
-          >
-            Добавить урок
-          </Button>
+          <>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setLessonSlotId(selectedPair.slots[0]?.id ?? null);
+                setAddLessonOpen(true);
+              }}
+            >
+              Добавить урок
+            </Button>
+            <Button
+              icon={<BookOutlined />}
+              onClick={() => navigate(`/teacher/subjects/${selectedPair.subjectId}`)}
+            >
+              Программа предмета
+            </Button>
+          </>
         )}
       </div>
 
