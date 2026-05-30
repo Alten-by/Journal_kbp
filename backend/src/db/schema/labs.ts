@@ -8,7 +8,8 @@ export const labWorks = sqliteTable('lab_works', {
   title: text('title').notNull(),
   description: text('description'),
   type: text('type', { enum: ['lab', 'practical', 'test', 'theory'] }).notNull(),
-  deadline: text('deadline'), // "2026-06-15"
+  startDate: text('start_date'), // "2026-05-30" — дата выдачи/начала работы
+  deadline: text('deadline'),   // "2026-06-15"
   isTeam: integer('is_team', { mode: 'boolean' }).notNull().default(false),
   taskFilePath: text('task_file_path'),
   createdAt: text('created_at'),

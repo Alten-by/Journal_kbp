@@ -101,9 +101,9 @@ export default function LabPage() {
         </div>
 
         <Descriptions column={isMobile ? 1 : 2} size="small">
-          {lab.createdAt && (
+          {lab.startDate && (
             <Descriptions.Item label="Дата выдачи">
-              {new Date(lab.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date(lab.startDate).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
             </Descriptions.Item>
           )}
           {lab.deadline && (

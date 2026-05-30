@@ -93,6 +93,7 @@ export default function TeacherSubjectPage() {
       title: lab.title,
       type: lab.type,
       description: lab.description ?? '',
+      startDate: lab.startDate ? dayjs(lab.startDate) : null,
       deadline: lab.deadline ? dayjs(lab.deadline) : null,
       isTeam: lab.isTeam,
     });
@@ -109,6 +110,7 @@ export default function TeacherSubjectPage() {
       fd.append('type', values.type);
       fd.append('description', values.description ?? '');
       fd.append('isTeam', String(isTeam));
+      if (values.startDate) fd.append('startDate', values.startDate.format('YYYY-MM-DD'));
       if (values.deadline) fd.append('deadline', values.deadline.format('YYYY-MM-DD'));
       if (taskFile[0]?.originFileObj) fd.append('taskFile', taskFile[0].originFileObj as File);
       if (isTeam && teamStudents.length > 0) fd.append('teamStudentIds', JSON.stringify(teamStudents));
@@ -242,6 +244,10 @@ export default function TeacherSubjectPage() {
 
           <Form.Item name="description" label="Описание">
             <TextArea rows={3} placeholder="Описание задания..." />
+          </Form.Item>
+
+          <Form.Item name="startDate" label="Дата начала работы">
+            <DatePicker style={{ width: '100%' }} format="DD.MM.YYYY" placeholder="Когда выдаётся работа" />
           </Form.Item>
 
           <Form.Item name="deadline" label="Дедлайн">
