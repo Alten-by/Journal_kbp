@@ -65,7 +65,38 @@ export function getJournal(req: Request, res: Response) {
 export function addLesson(req: Request, res: Response) {
   const { scheduleId, date } = req.body;
   if (!scheduleId || !date) { res.status(400).json({ error: 'scheduleId and date required' }); return; }
+
   const [lesson] = db.insert(lessons).values({ scheduleId, date }).returning().all();
+
+  // Автоопределение опозданий: если урок сегодня и текущее время уже прошло start_time —
+  // всем студентам группы ставим 'late' (преподаватель может скорректировать вручную)
+  const today = new Date().toISOString().slice(0, 10);
+  if (date === today) {
+    const slot = db.select().from(schedule).where(eq(schedule.id, scheduleId)).get();
+    if (slot) {
+      const now = new Date();
+      const [startH, startM] = slot.startTime.split(':').map(Number);
+      const startMinutes = startH * 60 + startM;
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      if (nowMinutes > startMinutes) {
+        const tsg = db.select().from(teacherSubjectGroup)
+          .where(eq(teacherSubjectGroup.id, slot.tsgId)).get();
+        if (tsg) {
+          const groupStudents = db.select().from(studentGroups)
+            .where(eq(studentGroups.groupId, tsg.groupId)).all();
+          for (const sg of groupStudents) {
+            db.insert(attendance).values({
+              studentId: sg.studentId,
+              lessonId: lesson.id,
+              status: 'late',
+            }).run();
+          }
+        }
+      }
+    }
+  }
+
   res.status(201).json(lesson);
 }
 
