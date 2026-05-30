@@ -76,6 +76,7 @@ export default function TeacherJournalPage() {
   const navigate = useNavigate();
   const [, setSchedule] = useState<ScheduleSlot[]>([]);
   const [pairs, setPairs] = useState<Pair[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
   const [selectedPair, setSelectedPair] = useState<Pair | null>(null);
   const [journal, setJournal] = useState<JournalResponse | null>(null);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
@@ -106,7 +107,10 @@ export default function TeacherJournalPage() {
         setSchedule(slots);
         const p = buildPairs(slots);
         setPairs(p);
-        if (p.length === 1) setSelectedPair(p[0]);
+        if (p.length === 1) {
+          setSelectedGroupId(p[0].groupId);
+          setSelectedPair(p[0]);
+        }
       })
       .finally(() => setLoadingSchedule(false));
   }, []);
@@ -265,20 +269,37 @@ export default function TeacherJournalPage() {
       {contextHolder}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <Title level={3} style={{ margin: 0 }}>Журнал</Title>
+
         <Select
-          style={{ minWidth: 260 }}
-          placeholder="Выберите предмет и группу"
-          value={selectedPair ? `${selectedPair.subjectId}-${selectedPair.groupId}` : undefined}
-          onChange={(val) => {
-            const [sid, gid] = val.split('-').map(Number);
-            const pair = pairs.find((p) => p.subjectId === sid && p.groupId === gid) ?? null;
-            setSelectedPair(pair);
+          style={{ minWidth: 180 }}
+          placeholder="Выберите группу"
+          value={selectedGroupId ?? undefined}
+          onChange={(gid) => {
+            setSelectedGroupId(gid);
+            setSelectedPair(null);
+            setJournal(null);
           }}
-          options={pairs.map((p) => ({
-            value: `${p.subjectId}-${p.groupId}`,
-            label: `${p.subjectName} — ${p.groupName}`,
+          options={Array.from(new Map(pairs.map(p => [p.groupId, p])).values()).map(p => ({
+            value: p.groupId,
+            label: p.groupName,
           }))}
         />
+
+        {selectedGroupId !== null && (
+          <Select
+            style={{ minWidth: 200 }}
+            placeholder="Выберите предмет"
+            value={selectedPair ? selectedPair.subjectId : undefined}
+            onChange={(sid) => {
+              const pair = pairs.find(p => p.subjectId === sid && p.groupId === selectedGroupId) ?? null;
+              setSelectedPair(pair);
+            }}
+            options={pairs.filter(p => p.groupId === selectedGroupId).map(p => ({
+              value: p.subjectId,
+              label: p.subjectName,
+            }))}
+          />
+        )}
         {selectedPair && (
           <>
             <Button
