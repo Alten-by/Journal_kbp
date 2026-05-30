@@ -185,7 +185,7 @@ export default function LabPage() {
             )}
             {submission.comment && (
               <Descriptions.Item label="Комментарий преподавателя">
-                <Alert message={submission.comment} type="info" showIcon />
+                <Alert title={submission.comment} type="info" showIcon />
               </Descriptions.Item>
             )}
             {submission.checkedAt && (
@@ -230,7 +230,7 @@ export default function LabPage() {
         <Card title="Сдать работу">
           {isDeadlinePast && (
             <Alert
-              message="Дедлайн пропущен"
+              title="Дедлайн пропущен"
               description="Вы всё ещё можете сдать работу, но она будет помечена как просроченная."
               type="warning"
               showIcon

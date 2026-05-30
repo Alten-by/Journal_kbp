@@ -110,8 +110,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           placement="left"
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
-          width={240}
-          styles={{ body: { padding: 0 }, header: { display: 'none' } }}
+          styles={{ wrapper: { width: 240 }, body: { padding: 0 }, header: { display: 'none' } }}
         >
           <NavMenu
             selectedKey={selectedKey}
