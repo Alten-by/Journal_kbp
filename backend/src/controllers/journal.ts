@@ -127,7 +127,7 @@ export function setGrade(req: Request, res: Response) {
   const { studentId, lessonId, value } = req.body;
   if (!studentId || !lessonId || value == null) { res.status(400).json({ error: 'studentId, lessonId, value required' }); return; }
   const num = Number(value);
-  if (!Number.isInteger(num) || num < 1 || num > 12) { res.status(400).json({ error: 'Grade must be integer 1-12' }); return; }
+  if (!Number.isInteger(num) || num < 1 || num > 10) { res.status(400).json({ error: 'Grade must be integer 1-10' }); return; }
 
   const existing = db.select().from(grades)
     .where(and(eq(grades.studentId, studentId), eq(grades.lessonId, lessonId))).get();

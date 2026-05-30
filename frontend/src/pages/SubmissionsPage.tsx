@@ -214,10 +214,10 @@ export default function SubmissionsPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="grade"
-            label="Оценка (1–12)"
+            label="Оценка (1–10)"
             rules={[{ required: true, message: 'Введите оценку' }]}
           >
-            <InputNumber min={1} max={12} style={{ width: '100%' }} />
+            <InputNumber min={1} max={10} style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item name="comment" label="Комментарий">
             <TextArea rows={3} placeholder="Хорошая работа! Обратите внимание на..." />

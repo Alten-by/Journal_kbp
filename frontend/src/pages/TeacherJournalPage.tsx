@@ -46,9 +46,9 @@ function cellFg(grade: number | null, attendance: AttendanceStatus | null): stri
   if (attendance === 'absent') return '#cf1322';
   if (attendance === 'late') return '#d48806';
   if (grade === null) return '#333';
-  if (grade >= 10) return '#389e0d';
+  if (grade >= 9) return '#389e0d';
   if (grade >= 7) return '#096dd9';
-  if (grade >= 4) return '#d48806';
+  if (grade >= 5) return '#d48806';
   return '#cf1322';
 }
 
@@ -450,7 +450,7 @@ export default function TeacherJournalPage() {
                               <InputNumber
                                 autoFocus
                                 min={1}
-                                max={12}
+                                max={10}
                                 value={gradeValue}
                                 onChange={(v) => setGradeValue(v)}
                                 onPressEnter={confirmGrade}
