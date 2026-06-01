@@ -72,7 +72,7 @@ export default function JournalCharts({ journal }: Props) {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-35} textAnchor="end" tick={{ fontSize: 11 }} interval={0} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'Средняя оценка']} />
+                <Tooltip formatter={(v) => [v, 'Средняя оценка']} />
                 <Bar dataKey="avg" fill="#1677ff" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -91,7 +91,7 @@ export default function JournalCharts({ journal }: Props) {
                   cy="45%"
                   outerRadius={80}
                   dataKey="value"
-                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                  label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {attData.map((_, i) => (
@@ -99,7 +99,7 @@ export default function JournalCharts({ journal }: Props) {
                   ))}
                 </Pie>
                 <Legend iconType="circle" iconSize={10} />
-                <Tooltip formatter={(v: number) => [v, 'Записей']} />
+                <Tooltip formatter={(v) => [v, 'Записей']} />
               </PieChart>
             </ResponsiveContainer>
           </div>
