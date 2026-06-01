@@ -114,7 +114,7 @@ export default function JournalCharts({ journal }: Props) {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'Средняя оценка']} />
+                <Tooltip formatter={(v) => [v, 'Средняя оценка']} />
                 <Line type="monotone" dataKey="avg" stroke="#1677ff" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
