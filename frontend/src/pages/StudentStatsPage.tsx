@@ -81,7 +81,7 @@ export default function StudentStatsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-30} textAnchor="end" tick={{ fontSize: 11 }} interval={0} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'Средняя оценка']} />
+                <Tooltip formatter={(v) => [v, 'Средняя оценка']} />
                 <Bar dataKey="avg" fill="#1677ff" radius={[4, 4, 0, 0]}
                   label={{ position: 'top', fontSize: 11, fill: '#555' }}
                 />
@@ -102,7 +102,7 @@ export default function StudentStatsPage() {
                   cy="45%"
                   outerRadius={80}
                   dataKey="value"
-                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                  label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {attData.map((_, i) => (
@@ -110,7 +110,7 @@ export default function StudentStatsPage() {
                   ))}
                 </Pie>
                 <Legend iconType="circle" iconSize={10} />
-                <Tooltip formatter={(v: number) => [v, 'Занятий']} />
+                <Tooltip formatter={(v) => [v, 'Занятий']} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -136,7 +136,7 @@ export default function StudentStatsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => [v, 'Оценка']} />
+                <Tooltip formatter={(v) => [v, 'Оценка']} />
                 <Line
                   type="monotone"
                   dataKey="grade"
